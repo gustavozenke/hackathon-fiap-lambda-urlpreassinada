@@ -2,7 +2,7 @@ import os
 
 import requests
 
-from exceptions.cliente_nao_encontrado_exception import ClienteNaoEncontradoException
+from src.exceptions.cliente_nao_encontrado_exception import ClienteNaoEncontradoException
 
 
 class ClienteRepository:

@@ -1,7 +1,7 @@
-from exceptions.cliente_nao_encontrado_exception import ClienteNaoEncontradoException
-from service.cliente_service import ClienteService
-from service.token_service import TokenService
-from utils.utils import payload_encode_token, payload_response_gateway
+from src.exceptions.cliente_nao_encontrado_exception import ClienteNaoEncontradoException
+from src.service.cliente_service import ClienteService
+from src.service.token_service import TokenService
+from src.utils.utils import payload_encode_token, payload_response_gateway
 
 
 class AutenticacaoService:
