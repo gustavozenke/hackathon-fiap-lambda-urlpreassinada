@@ -21,10 +21,6 @@ class AutenticacaoService:
                 status_code = error.args[0]
                 body = error.args[1]
                 return payload_response_gateway(status_code, body)
-            except Exception as error:
-                status_code = error.args[0]
-                body = error.args[1]
-                return payload_response_gateway(status_code, body)
         else:
             response = {
                 "cpf": self.cliente_sem_identificacao,

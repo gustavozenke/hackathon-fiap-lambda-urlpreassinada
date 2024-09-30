@@ -1,6 +1,6 @@
 import os
 
-import requests
+from pymongo import MongoClient
 
 from src.exceptions.cliente_nao_encontrado_exception import ClienteNaoEncontradoException
 
@@ -8,16 +8,20 @@ from src.exceptions.cliente_nao_encontrado_exception import ClienteNaoEncontrado
 class ClienteRepository:
 
     def __init__(self):
-        self.url = os.getenv("cliente_url")
-        self.endpoint = os.getenv("cliente_endpoint")
+        uri = os.getenv("mongodb_uri")
+        database = os.getenv("database")
 
-    def buscar_cliente(self, params):
-        url = self.url + self.endpoint
-        response = requests.get(url, params=params)
+        self.client = MongoClient(uri)
+        self.database = self.client[database]
 
-        if response.status_code == 200:
-            return response.json()
-        elif response.status_code == 404:
-            raise ClienteNaoEncontradoException(response.status_code, "Cliente nao encontrado.")
-        else:
-            raise Exception(response.status_code, "Falha ao realizar chamada de API.")
+    def buscar_cliente(self, query):
+        collection = self.database["cliente"]
+        results = list(collection.find(query))
+
+        if not results:
+            raise ClienteNaoEncontradoException(404, "Cliente nao encontrado.")
+
+        return list(results)[0]
+
+    def close(self):
+        self.client.close()

@@ -11,5 +11,4 @@ class ClienteService:
         event = {
             "cpf": cpf_cliente
         }
-
         return self.cliente_repository.buscar_cliente(event)
