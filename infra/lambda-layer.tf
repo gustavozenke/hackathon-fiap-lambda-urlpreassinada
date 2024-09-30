@@ -1,6 +1,6 @@
 #define variables
 locals {
-  layer_path        = "lambda_layer"
+  layer_path        = "src"
   layer_zip_name    = "layer.zip"
   layer_name        = "lambda_layer"
   requirements_name = "requirements.txt"
