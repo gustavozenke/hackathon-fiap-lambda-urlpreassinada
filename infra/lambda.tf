@@ -11,7 +11,7 @@ resource "aws_lambda_function" "this" {
   function_name = "postech-serverless"
   role          = "arn:aws:iam::975748149223:role/LabRole"
   handler       = "main.lambda_handler"
-
+  layers           = [aws_lambda_layer_version.lambda_layer.arn]
   runtime = "python3.8"
 
   environment {
