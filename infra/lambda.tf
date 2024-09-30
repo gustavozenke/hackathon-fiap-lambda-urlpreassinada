@@ -8,11 +8,10 @@ resource "aws_lambda_function" "this" {
   filename      = data.archive_file.lambda.output_path
   source_code_hash = data.archive_file.lambda.output_base64sha256
 
-  function_name = "postech-serverless"
-  role          = "arn:aws:iam::975748149223:role/LabRole"
-  handler       = "main.lambda_handler"
-  layers           = [aws_lambda_layer_version.lambda_layer.arn]
-  runtime = "python3.8"
+  function_name = var.function_name
+  role          = var.function_role
+  handler       = var.handler
+  runtime       = var.runtime
 
   environment {
     variables = {
@@ -22,4 +21,6 @@ resource "aws_lambda_function" "this" {
       secret = "5d319eaf5a5be8e83b0e8777d98baeb783d72f8a"
     }
   }
+
+  layers = [aws_lambda_layer_version.lambda_layer.arn]
 }

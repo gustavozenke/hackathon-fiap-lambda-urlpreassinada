@@ -1,4 +1,3 @@
-# Configure backend - terraform.tfstate
 terraform {
   backend "s3" {
     bucket = "tech-challenge-terraform-tfstate"
