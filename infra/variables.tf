@@ -17,3 +17,8 @@ variable "runtime" {
   type        = string
   default     = "python3.8"
 }
+
+variable "timeout" {
+  type        = number
+  default     = 60
+}

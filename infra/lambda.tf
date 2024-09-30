@@ -12,6 +12,7 @@ resource "aws_lambda_function" "this" {
   role          = var.function_role
   handler       = var.handler
   runtime       = var.runtime
+  timeout       = var.timeout
 
   environment {
     variables = {
