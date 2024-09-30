@@ -1,3 +1,4 @@
+import json
 from exceptions.cliente_nao_encontrado_exception import ClienteNaoEncontradoException
 from service.cliente_service import ClienteService
 from service.token_service import TokenService
@@ -37,4 +38,4 @@ class AutenticacaoService:
             "access_token": token
         }
 
-        return payload_response_gateway(200, body)
+        return payload_response_gateway(200, json.dumps(body))
