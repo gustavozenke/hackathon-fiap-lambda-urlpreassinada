@@ -1,4 +1,4 @@
-from src.service.autenticacao_service import AutenticacaoService
+from service.autenticacao_service import AutenticacaoService
 
 
 def lambda_handler(event, context):

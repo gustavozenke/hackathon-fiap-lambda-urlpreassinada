@@ -2,7 +2,7 @@ import os
 
 from pymongo import MongoClient
 
-from src.exceptions.cliente_nao_encontrado_exception import ClienteNaoEncontradoException
+from exceptions.cliente_nao_encontrado_exception import ClienteNaoEncontradoException
 
 
 class ClienteRepository:
