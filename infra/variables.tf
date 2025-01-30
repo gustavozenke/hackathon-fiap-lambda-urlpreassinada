@@ -5,7 +5,7 @@ variable "function_name" {
 
 variable "function_role" {
   type        = string
-  default     = "arn:aws:iam::369780787289:role/RoleForLambdaModLabRole"
+  default     = "arn:aws:iam::369780787289:role/LabRole"
 }
 
 variable "handler" {
