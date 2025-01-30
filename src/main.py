@@ -1,23 +1,26 @@
 import boto3
 import json
 from botocore.exceptions import ClientError
+from botocore.config import Config
+
+config = Config(signature_version='s3v4')
 
 
 def lambda_handler(event, context):
     try:
-        s3_client = boto3.client('s3')
+        s3_client = boto3.client('s3', config=config)
 
-        claims = event['requestContext']['authorizer']['claims']
-
-        metadata = {f'x-amz-meta-{key.replace(":", "_").lower()}': str(value)
-                    for key, value in claims.items()}
+        # claims = event['requestContext']['authorizer']['jwt']['claims']
+        # metadata = {f'x-amz-meta-{key.replace(":", "_").lower()}': str(value)
+        #             for key, value in claims.items()}
 
         presigned_url = s3_client.generate_presigned_url(
             'put_object',
             Params={
                 'Bucket': 'bucket-hackathon-fiap-raw-videos',
-                'Key': 'uploads/${filename}',
-                'Metadata': metadata
+                'Key': 'arquivo',
+                # 'Metadata': metadata,
+                'ContentType': 'video/x-ms-wmv'
             },
             ExpiresIn=3600
         )
