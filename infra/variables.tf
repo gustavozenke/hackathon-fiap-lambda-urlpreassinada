@@ -1,11 +1,11 @@
 variable "function_name" {
   type        = string
-  default     = "postech-serverless"
+  default     = "hackathon-gera-urlpreassinada"
 }
 
 variable "function_role" {
   type        = string
-  default     = "arn:aws:iam::975748149223:role/LabRole"
+  default     = "arn:aws:iam::369780787289:role/LabRole"
 }
 
 variable "handler" {
