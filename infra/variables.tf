@@ -15,7 +15,7 @@ variable "handler" {
 
 variable "runtime" {
   type        = string
-  default     = "python3.8"
+  default     = "python3.9"
 }
 
 variable "timeout" {
