@@ -36,7 +36,7 @@ resource "aws_lambda_layer_version" "lambda_layer" {
   s3_bucket           = aws_s3_bucket.lambda_layer.id
   s3_key              = aws_s3_object.lambda_layer_zip.key
   layer_name          = local.layer_name
-  compatible_runtimes = ["python3.8"]
+  compatible_runtimes = ["python3.9"]
   skip_destroy        = true
   depends_on          = [aws_s3_object.lambda_layer_zip]
 }
