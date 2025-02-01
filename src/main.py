@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 
 import boto3
-import pytz
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
@@ -55,7 +54,7 @@ def lambda_handler(event: dict, context):
 
 def get_object_key(event: dict):
     username = event['requestContext']['authorizer']['claims']['username']
-    date_time = datetime.now(pytz.timezone('America/Sao_Paulo')).strftime("%Y%m%d%H%M%S")
+    date_time = datetime.now().strftime("%Y%m%d%H%M%S")
     return "{}-{}.wmv".format(username, date_time)
 
 
