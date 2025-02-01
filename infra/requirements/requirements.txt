@@ -1,4 +1,4 @@
+pytz
 boto3
 botocore
 urllib3
-pytz
