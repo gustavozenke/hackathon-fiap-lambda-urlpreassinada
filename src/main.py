@@ -17,8 +17,7 @@ def lambda_handler(event: dict, context):
             Params={
                 'Bucket': "bucket-hackathon-fiap-raw-videos",
                 'Key': get_object_key(event),
-                "ServerSideEncryption": "aws:kms",
-                "SSEKMSKeyId": "arn:aws:kms:us-east-1:369780787289:key/c99e7a1b-f118-4a29-9c40-93faa0e2162e",
+                "ServerSideEncryption": "AES256",
                 "ContentType": "video/x-ms-wmv"
             },
             ExpiresIn=3600
