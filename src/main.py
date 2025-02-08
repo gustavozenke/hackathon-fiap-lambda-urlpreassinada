@@ -13,12 +13,32 @@ PARTS = 10
 
 def lambda_handler(event: dict, context):
     try:
-        validar_informacoes_request(event)
-        s3_client = boto3.client('s3', config=config)
+
         content_type = event['headers'].get('Content-Type', None)
         nome_video = event['headers'].get('Nome-Video', None)
+        nome_usuario = event['requestContext']['authorizer']['claims']['username']
 
-        s3_key = get_object_key(nome_video, FormatoVideo.from_mime(content_type))
+        if content_type is None:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'Header Content-Type faltando'})
+            }
+
+        if nome_video is None:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'Header Nome-Video faltando'})
+            }
+
+        if FormatoVideo.from_mime(content_type) is None:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'Header Content-Type com valor nao permitido'})
+            }
+
+        s3_client = boto3.client('s3', config=config)
+
+        s3_key = get_object_key(nome_usuario, nome_video, FormatoVideo.from_mime(content_type))
 
         presigned_url = s3_client.generate_presigned_url(
             'put_object',
@@ -59,32 +79,9 @@ def lambda_handler(event: dict, context):
         }
 
 
-def validar_informacoes_request(event):
-    content_type = event['headers'].get('Content-Type', None)
-    nome_video = event['headers'].get('nome_video', None)
-
-    if content_type is None:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Header Content-Type faltando'})
-        }
-
-    if nome_video is None:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Header nome_video faltando'})
-        }
-
-    if FormatoVideo.from_mime(content_type) is None:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Header Content-Type com valor nao permitido'})
-        }
-
-
-def get_object_key(nome_video, formato):
+def get_object_key(nome_usuario, nome_video, formato):
     date_time = datetime.now().strftime("%Y%m%d%H%M%S")
-    return "{}-{}.{}".format(nome_video, date_time, formato)
+    return "{}-{}-{}.{}".format(nome_usuario, nome_video, date_time, formato)
 
 
 if __name__ == '__main__':
