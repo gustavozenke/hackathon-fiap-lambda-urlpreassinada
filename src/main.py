@@ -11,6 +11,13 @@ config = Config(signature_version='s3v4')
 def lambda_handler(event: dict, context):
     try:
         s3_client = boto3.client('s3', config=config)
+        content_type = event['headers'].get('Content-Type', None)
+
+        if content_type is None:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'Header Content-Type faltando'})
+            }
 
         presigned_url = s3_client.generate_presigned_url(
             'put_object',
@@ -18,7 +25,7 @@ def lambda_handler(event: dict, context):
                 'Bucket': "bucket-hackathon-fiap-raw-videos",
                 'Key': get_object_key(event),
                 "ServerSideEncryption": "AES256",
-                "ContentType": "video/x-ms-wmv"
+                "ContentType": content_type
             },
             ExpiresIn=3600
         )
