@@ -39,6 +39,8 @@ def lambda_handler(event: dict, context):
         s3_key = get_object_key(nome_usuario, nome_video, FormatoVideo.from_mime(content_type))
         bucket_name = os.getenv("BUCKET_NAME")
 
+        logger.info(f"Gerando URL pre assinada para upload do video {nome_video}")
+
         presigned_url = s3_client.generate_presigned_url(
             'put_object',
             Params={
@@ -52,6 +54,8 @@ def lambda_handler(event: dict, context):
 
         body = {'presigned_url': presigned_url}
         headers = {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}
+
+        logger.info(body)
         return response(200, body, headers)
 
     except KeyError as e:
