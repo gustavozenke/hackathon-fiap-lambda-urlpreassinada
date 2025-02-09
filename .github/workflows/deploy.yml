@@ -18,10 +18,11 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
+      - name: Install dependencies and run tests / generate coverage report
         run: |
           python -m pip install --upgrade pip
           pip install -r ./infra/requirements/requirements.txt
+          pytest --cov=src --cov-report=xml:reports/coverage.xml
 
       - name: Run SonarCloud Analysis
         uses: SonarSource/sonarcloud-github-action@master
