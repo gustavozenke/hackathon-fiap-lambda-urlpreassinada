@@ -1,4 +1,6 @@
 import json
+import logging
+import os
 from datetime import datetime
 
 import boto3
@@ -8,42 +10,39 @@ from botocore.exceptions import ClientError
 from formato_video import FormatoVideo
 
 config = Config(signature_version='s3v4')
-PARTS = 10
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def lambda_handler(event: dict, context):
     try:
+        logger.info(f"Mensagem recebida={event}")
 
         content_type = event['headers'].get('Content-Type', None)
         nome_video = event['headers'].get('Nome-Video', None)
         nome_usuario = event['requestContext']['authorizer']['claims']['username']
 
         if content_type is None:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'Header Content-Type faltando'})
-            }
+            logger.error("Header Content-Type faltando")
+            return response(400, {'error': 'Header Content-Type faltando'}, None)
 
         if nome_video is None:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'Header Nome-Video faltando'})
-            }
+            logger.error("Header Nome-Video faltando")
+            return response(400, {'error': 'Header Nome-Video faltando'}, None)
 
         if FormatoVideo.from_mime(content_type) is None:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'Header Content-Type com valor nao permitido'})
-            }
+            logger.error("Header Header Content-Type com valor nao permitido faltando")
+            return response(400, {'error': 'Header Content-Type com valor nao permitido'}, None)
 
         s3_client = boto3.client('s3', config=config)
-
         s3_key = get_object_key(nome_usuario, nome_video, FormatoVideo.from_mime(content_type))
+        bucket_name = os.getenv("BUCKET_NAME")
 
         presigned_url = s3_client.generate_presigned_url(
             'put_object',
             Params={
-                'Bucket': "bucket-hackathon-fiap-raw-videos",
+                'Bucket': bucket_name,
                 'Key': s3_key,
                 "ServerSideEncryption": "AES256",
                 "ContentType": content_type
@@ -51,37 +50,34 @@ def lambda_handler(event: dict, context):
             ExpiresIn=3600
         )
 
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Content-Type': 'application/json'
-            },
-            'body': json.dumps({
-                'presigned_url': presigned_url
-            })
-        }
+        body = {'presigned_url': presigned_url}
+        headers = {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}
+        return response(200, body, headers)
 
     except KeyError as e:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': f'Campo obrigatório faltando: {str(e)}'})
-        }
+        logger.error(f'Campo obrigatório faltando: {str(e)}')
+        return response(400, {'error': f'Campo obrigatório faltando: {str(e)}'}, None)
+
     except ClientError as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': f'Erro no S3: {str(e)}'})
-        }
+        logger.error(f'Erro ao gerar URL pre assinada no S3: {str(e)}')
+        return response(500, {'error': f'Erro ao gerar URL pre assinada no S3: {str(e)}'}, None)
+
     except Exception as e:
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': str(e)})
-        }
+        logger.error(f'Erro generico: {str(e)}')
+        return response(500, {'error': f'Erro generico: {str(e)}'}, None)
 
 
 def get_object_key(nome_usuario, nome_video, formato):
     date_time = datetime.now().strftime("%Y%m%d%H%M%S")
     return "{}-{}-{}.{}".format(nome_usuario, nome_video, date_time, formato)
+
+
+def response(status_code, body, headers):
+    return {
+        'statusCode': status_code,
+        'headers': headers,
+        'body': json.dumps(body)
+    }
 
 
 if __name__ == '__main__':
@@ -91,7 +87,7 @@ if __name__ == '__main__':
         'headers': {
             'Accept': '*/*',
             'Accept-Encoding': 'gzip, deflate, br',
-            'Authorization': 'Bearer eyJraWQiOiJVVmNGaWxVdzFxa29yUUxQT2o4bGMzeEFiR3NxNWp4eTdEUWVJcTYwSkU0PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJkNDM4NDRjOC0xMDQxLTcwODktNGI5ZC02YjMzYjJlOTNjYzgiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KN1Brb3NyTjciLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI0c2txNGk5YnUwOWxpYjlvN2c0NnA3ZzVuZCIsIm9yaWdpbl9qdGkiOiI2Y2RlNWI1ZS0yMjYxLTQzMWMtOTMyYi1lNDNjZDVhOWFiMmQiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXV0aF90aW1lIjoxNzM4Mzg3NDA1LCJleHAiOjE3MzgzOTEwMDUsImlhdCI6MTczODM4NzQwNSwianRpIjoiMDQ1ODE1YmMtYmRlOS00YTk5LWExNzUtOTg3OGRlZjU5ZjNhIiwidXNlcm5hbWUiOiJndXN0YXZvemVua2UifQ.T2I3mzzKQwQESaQhY5dte9tQM78N7uFKaLFEc5SYFkApkXupclGcWcK5mE0iijrbwuTiYA2CrzGG11PTzy-NTslgOCOVYSLjaNiS_arHynce2l2DoOSfehLmdrmLl064hycXtjaLyjJw65nqO3hE9agltmoP7mdqQlU-LQrAgn-6lhSYeW2BnNq1pJCC1U9XAuuEnfHBKo_cTydWEefnpKbCMPfeVEZDSfFcKzBpxMTVcd5X5v-82ICYGH7WvrTDG6YlrLVPTPfb5JVQS7o0XT7_f88bmJwnaTTOe_oe0LOBRoNQQKTkFgyk-jRjMKLy4eoWgEa_VMBOz53_pvVO4Q',
+            'Authorization': 'Bearer token',
             'Cache-Control': 'no-cache',
             'Host': 'r4789v85wb.execute-api.us-east-1.amazonaws.com',
             'Postman-Token': '7e3b1ace-73d1-48b9-bb54-ff955bcf9e4a',
@@ -107,7 +103,7 @@ if __name__ == '__main__':
             'Accept': ['*/*'],
             'Accept-Encoding': ['gzip, deflate, br'],
             'Authorization': [
-                'Bearer eyJraWQiOiJVVmNGaWxVdzFxa29yUUxQT2o4bGMzeEFiR3NxNWp4eTdEUWVJcTYwSkU0PSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiJkNDM4NDRjOC0xMDQxLTcwODktNGI5ZC02YjMzYjJlOTNjYzgiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9KN1Brb3NyTjciLCJ2ZXJzaW9uIjoyLCJjbGllbnRfaWQiOiI0c2txNGk5YnUwOWxpYjlvN2c0NnA3ZzVuZCIsIm9yaWdpbl9qdGkiOiI2Y2RlNWI1ZS0yMjYxLTQzMWMtOTMyYi1lNDNjZDVhOWFiMmQiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXV0aF90aW1lIjoxNzM4Mzg3NDA1LCJleHAiOjE3MzgzOTEwMDUsImlhdCI6MTczODM4NzQwNSwianRpIjoiMDQ1ODE1YmMtYmRlOS00YTk5LWExNzUtOTg3OGRlZjU5ZjNhIiwidXNlcm5hbWUiOiJndXN0YXZvemVua2UifQ.T2I3mzzKQwQESaQhY5dte9tQM78N7uFKaLFEc5SYFkApkXupclGcWcK5mE0iijrbwuTiYA2CrzGG11PTzy-NTslgOCOVYSLjaNiS_arHynce2l2DoOSfehLmdrmLl064hycXtjaLyjJw65nqO3hE9agltmoP7mdqQlU-LQrAgn-6lhSYeW2BnNq1pJCC1U9XAuuEnfHBKo_cTydWEefnpKbCMPfeVEZDSfFcKzBpxMTVcd5X5v-82ICYGH7WvrTDG6YlrLVPTPfb5JVQS7o0XT7_f88bmJwnaTTOe_oe0LOBRoNQQKTkFgyk-jRjMKLy4eoWgEa_VMBOz53_pvVO4Q'],
+                'Bearer token'],
             'Cache-Control': ['no-cache'], 'Host': ['r4789v85wb.execute-api.us-east-1.amazonaws.com'],
             'Postman-Token': ['7e3b1ace-73d1-48b9-bb54-ff955bcf9e4a'],
             'User-Agent': ['PostmanRuntime/7.26.8'],
