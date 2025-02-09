@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 # Adiciona o caminho da pasta src ao sys.path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../application/src")))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src")))
 
 from src.main import lambda_handler
 
