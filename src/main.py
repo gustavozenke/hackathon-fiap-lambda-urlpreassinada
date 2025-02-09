@@ -11,7 +11,7 @@ from formato_video import FormatoVideo
 
 config = Config(signature_version='s3v4')
 
-logging.basicConfig(level=logging.INFO)
+logging.getLogger().setLevel(logging.INFO)
 logger = logging.getLogger(__name__)
 
 
