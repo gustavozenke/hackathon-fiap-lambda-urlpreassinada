@@ -7,7 +7,7 @@ import boto3
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
-from formato_video import FormatoVideo
+from src.formato_video import FormatoVideo
 
 config = Config(signature_version='s3v4')
 
