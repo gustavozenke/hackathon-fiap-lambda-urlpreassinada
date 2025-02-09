@@ -22,7 +22,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r ./infra/requirements/requirements.txt
-          pytest --cov=src --cov-report=xml:reports/coverage.xml
+          pytest --cov=app/src --cov-report=xml:reports/coverage.xml
 
       - name: Run SonarCloud Analysis
         uses: SonarSource/sonarcloud-github-action@master
