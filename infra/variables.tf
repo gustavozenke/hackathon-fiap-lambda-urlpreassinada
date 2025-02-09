@@ -22,3 +22,8 @@ variable "timeout" {
   type        = number
   default     = 60
 }
+
+variable "bucket_name" {
+  type        = string
+  default     = "bucket-hackathon-fiap-raw-videos"
+}

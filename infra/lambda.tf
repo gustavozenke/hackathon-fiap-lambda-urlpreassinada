@@ -16,6 +16,7 @@ resource "aws_lambda_function" "this" {
 
   environment {
     variables = {
+      BUCKET_NAME = var.bucket_name
       env = "prod"
     }
   }
