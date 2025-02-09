@@ -35,6 +35,8 @@ jobs:
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
             -Dsonar.sources=src
             -Dsonar.tests=tests
+            -Dsonar.verbose=true
+            -Dsonar.python.coverage.reportPaths=coverage.xml
 
   deploy-infra:
     runs-on: ubuntu-latest
