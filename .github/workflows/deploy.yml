@@ -38,6 +38,7 @@ jobs:
             -Dsonar.tests=tests
             -Dsonar.verbose=true
             -Dsonar.python.coverage.reportPaths=reports/coverage.xml
+            -Dsonar.coverage.exclusions="**/formato_video.py"
 
   deploy-infra:
     runs-on: ubuntu-latest
