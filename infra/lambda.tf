@@ -17,12 +17,3 @@ resource "aws_lambda_function" "this" {
 
   layers = [aws_lambda_layer_version.lambda_layer.arn]
 }
-
-# Permissão para a função Lambda ser invocada pelo API Gateway
-resource "aws_lambda_permission" "allow_api_gateway_presigned_url" {
-  statement_id  = "AllowAPIGatewayInvoke"
-  action        = "lambda:InvokeFunction"
-  function_name = var.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = data.aws_api_gateway_rest_api.apigateway_rest_api.arn
-}
