@@ -34,7 +34,7 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.token=${{ secrets.SONAR_TOKEN }}
             -Dsonar.sources=app/src
-            -Dsonar.tests=app/test
+            -Dsonar.tests=app/tests
             -Dsonar.test.inclusions=**/test_*.py
 
   deploy-infra:
